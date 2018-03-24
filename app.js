@@ -10,9 +10,10 @@ app.use(cookieParser());
 app.use(express.static('public'));
 
 const bodyParser = require('body-parser');
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.set('view engine', 'ejs'); // générateur de template
+app.set('view engine', 'ejs');
 const MongoClient = require('mongodb').MongoClient;
 
 const ObjectID = require('mongodb').ObjectID;
@@ -134,6 +135,32 @@ app.get('/vider', (req, res) => {
 app.get('/chat', (req, res) => {
 	res.render('socket_vue.ejs');
 })
+
+app.post('/ajax_sauver', (req,res) => {
+	req.body._id = ObjectID(req.body._id)
+
+	db.collection('adresse').save(req.body, (err, result) => {
+		if (err) return console.log(err)
+   		console.log('sauvegarder dans la BD')
+		res.send(JSON.stringify(req.body));
+	})
+})
+
+app.post('/ajax_supprimer', (req, res) => {
+	db.collection('adresse').findOneAndDelete({"_id": ObjectID(req.body._id)}, (err, resultat) => {
+		if (err) return console.log(err)
+		console.log('supprimé de la BD')
+ 		res.send(JSON.stringify(req.body))
+ 	})
+})
+
+app.post('/ajax_ajouter', (req, res) => {
+ 	db.collection('adresse').save(req.body, (err, result) => {
+ 		if (err) return console.log(err)
+ 		console.log('sauvegarder dans la BD')
+ 		res.send(JSON.stringify(req.body))
+ 	})
+ })
 
 MongoClient.connect('mongodb://127.0.0.1:27017', (err, database) => {
 	if (err) return console.log(err)
